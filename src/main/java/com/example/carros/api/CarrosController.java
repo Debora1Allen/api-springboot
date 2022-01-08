@@ -6,6 +6,7 @@ import com.example.carros.domain.dto.CarroDTo;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -28,8 +29,8 @@ public class CarrosController {
 
     @GetMapping("/{id}")
     public ResponseEntity get(@PathVariable("id") Long id) {
-        Optional<CarroDTo> carro = service.getCarrosById(id);
-        return carro.isPresent() ? ResponseEntity.ok(carro.get()) : ResponseEntity.notFound().build();
+        CarroDTo carro = service.getCarrosById(id);
+        return ResponseEntity.ok(carro);
     }
 
     @GetMapping("/tipo/{tipo}")
@@ -39,15 +40,12 @@ public class CarrosController {
     }
 
     @PostMapping
+    @Secured({ "ROLE_ADMIN" })
     public ResponseEntity post(@RequestBody Carro carro) {
 
-        try {
-            CarroDTo c = service.insert(carro);
-            URI location = getUri(c.getId());
-            return ResponseEntity.created(location).build();
-        } catch (Exception ex) {
-            return ResponseEntity.badRequest().build();
-        }
+        CarroDTo c = service.insert(carro);
+        URI location = getUri(c.getId());
+        return ResponseEntity.created(location).build();
 
     }
 
@@ -56,16 +54,18 @@ public class CarrosController {
     }
 
     @PutMapping("/{id}")
-    public String put(@PathVariable("id") Long id, @RequestBody Carro carro) {
-        Carro c = service.update(carro, id);
-        return "Carro atualizado com sucesso:" + c.getId();
+    public ResponseEntity put(@PathVariable("id") Long id, @RequestBody Carro carro) {
+        carro.setId(id);
+
+        CarroDTo c = service.update(carro, id);
+
+        return c != null ? ResponseEntity.ok(c) : ResponseEntity.notFound().build();
     }
 
     @DeleteMapping("/{id}")
-    public String delete(@PathVariable("id") Long id) {
+    public ResponseEntity delete(@PathVariable("id") Long id) {
         service.delete(id);
-
-        return "Carro deletado com sucesso";
+        return ResponseEntity.ok().build();
     }
 
 }

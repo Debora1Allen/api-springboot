@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import com.example.carros.api.exception.ObjectNotFound;
 import com.example.carros.domain.dto.CarroDTo;
 
 @Service
@@ -21,8 +22,9 @@ public class CarroService {
 
     }
 
-    public Optional<CarroDTo> getCarrosById(Long id) {
-        return rep.findById(id).map(c -> CarroDTo.create(c));
+    public CarroDTo getCarrosById(Long id) {
+        return rep.findById(id).map(c -> CarroDTo.create(c))
+                .orElseThrow(() -> new ObjectNotFound("Carro não encontrato"));
     }
 
     public List<CarroDTo> getCarrosByTipo(String tipo) {
@@ -34,7 +36,7 @@ public class CarroService {
         return CarroDTo.create(rep.save(carro));
     }
 
-    public Carro update(Carro carro, Long id) {
+    public CarroDTo update(Carro carro, Long id) {
         Assert.notNull(id, "Não foi possivel atualizar o registro");
         Optional<Carro> optional = rep.findById(id);
         if (optional.isPresent()) {
@@ -43,7 +45,7 @@ public class CarroService {
             db.setTipo(carro.getTipo());
             System.out.println("Carro id" + db.getId());
             rep.save(db);
-            return db;
+            return CarroDTo.create(db);
 
         } else {
             throw new RuntimeException("Não foi possivel localizar registro");
@@ -52,8 +54,7 @@ public class CarroService {
 
     public void delete(Long id) {
 
-        if (getCarrosById(id).isPresent()) {
-            rep.deleteById(id);
-        }
+        rep.deleteById(id);
+
     }
 }
