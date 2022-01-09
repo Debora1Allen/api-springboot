@@ -1,5 +1,7 @@
 package com.example.carros.api;
 
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -7,13 +9,13 @@ import org.springframework.web.bind.annotation.*;
 public class IndexController {
 
     @GetMapping()
-    public String get(){
+    public String get() {
         return "API dos Carros";
     }
 
-
-
-
-
+    @GetMapping("/userInfor")
+    public UserDetails userInfo(@AuthenticationPrincipal UserDetails user) {
+        return user;
+    }
 
 }
